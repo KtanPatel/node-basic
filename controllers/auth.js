@@ -45,6 +45,7 @@ exports.signup = async (req, res, next) => {
         const user = new User({
             email: req.body.email,
             password: req.body.password,
+            role: req.body.role,
             profile: { ...req.body }
         });
         User.findOne({ email: req.body.email }, (err, existingUser) => {
