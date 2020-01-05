@@ -1,10 +1,45 @@
 const User = require('../models/user');
-
+const { removeFile } = require('../helpers/utils');
 exports.profile = async (req, res) => {
     try {
         res.status(200).send({
             success: true,
             data: req.data
+        });
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
+exports.updateProfile = async (req, res) => {
+    try {
+        if (req.fileValidationError) {
+            throw new Error(req.fileValidationError);
+        }
+        const user = await User.findOne({ _id: req.data._id }).lean();
+        const profile = { ...user.profile, ...req.body };
+
+        if (req.files["image"]) {
+            if (profile.picture) {
+                removeFile(profile.picture); // we can move file to "Trash" as well.
+            }
+            profile.picture = req.files["image"][0].path;
+        }
+
+        await User.findOne({ _id: req.data._id }, (err, u) => {
+            if (err) {
+                throw new Error(err.message);
+            } else {
+                u.profile = profile;
+                u.save();
+                res.status(200).send({
+                    success: true,
+                    message: 'Profile updated successfully.'
+                });
+            }
         });
     } catch (error) {
         res.status(500).send({

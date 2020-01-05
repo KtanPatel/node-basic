@@ -6,7 +6,6 @@ var logger = require('morgan');
 
 const _ = require('lodash');
 const mongoose = require('mongoose');
-const multer = require('multer');
 const cors = require('cors');
 
 var indexRouter = require('./routes/index');
@@ -35,29 +34,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors());
-
-// file storage location
-const fileStorage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, 'public/images')
-  },
-  filename: (req, file, callback) => {
-    callback(null, new Date().getTime() + '-' + file.originalname)
-  },
-})
-
-// Image type filter
-const fileFilter = (req, file, callback) => {
-  if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
-    callback(null, true)
-  } else {
-    callback(null, false)
-  }
-}
-
-app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
-);
 
 // image path url
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
